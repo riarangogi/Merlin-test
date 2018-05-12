@@ -13,5 +13,7 @@ jobs<-dbGetQuery(cnc,statement = 'SELECT idJob, idCategory, experienceName,
                  jobType, duration FROM jobs')
 head(jobs)
 
-job_app<-dbGetQuery(cnc,statement = 'SELECT * FROM job_applications')
-str(job_app)
+##Elegimos las variables que pueden caracterizar a un buen candidato
+cand<-dbGetQuery(cnc,statement = 'SELECT idUser, idCategory, position, duration
+                 FROM work_experiences')
+head(cand)
