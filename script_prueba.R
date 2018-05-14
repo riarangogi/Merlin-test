@@ -32,3 +32,14 @@ x<-as.list(x)
 ##data frame con los candidatos mejor calificado que aplicaron
 A<-subset(cand_sta,idUser %in% x$idUser)
 B<-subset(A,event=='Application')
+
+##buenos candidatos/candidatos
+C<-subset(cand_sta,event=='Application')
+m<-length(B$id)/length(C$id)
+
+##numero de semanas
+n<-length(unique(cand_sta$timeStamp))/7
+n<-as.integer(n)
+
+##respuesta
+(m/n)*100
