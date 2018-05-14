@@ -21,7 +21,14 @@ head(cand)
 
 ##2
 cand_sta<-dbGetQuery(cnc,statement = 'SELECT * FROM candidate_statistics')
+cand_sta$timeStamp<-as.Date(cand_sta$timeStamp)
+cand_sta$idUser<-as.character(cand_sta$idUser)
 str(cand_sta)
 
-##Solo fecha,es decir: año, mes y día
-cand_sta$timeStamp<-as.Date(cand_sta$timeStamp)
+##El id de los candidatos más calificados
+x<-subset(cand,duration=='+3 Years',select = idUser)
+x<-as.list(x)
+
+##data frame con los candidatos mejor calificado que aplicaron
+A<-subset(cand_sta,idUser %in% x$idUser)
+B<-subset(A,event=='Application')
