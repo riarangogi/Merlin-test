@@ -43,3 +43,17 @@ n<-as.integer(n)
 
 ##respuesta
 (m/n)*100
+
+
+##3
+cand_app<-dbGetQuery(cnc,statement = 'SELECT * FROM candidate_applications')
+##No hay forma de saberque trabajo presenta mas aplicaciones de ditinttos can-
+##ddidatos diferentes pues la tabla candidate_Applications no tiene la columna
+##idJob.
+
+
+
+##4
+##No hay forma de relacionar los trabajos que presentan mayores aplicaciones
+##de ditinttos candidatos  con los empleadores pues la tabla candidate_Appli-
+##cations no tiene la columna idJob.

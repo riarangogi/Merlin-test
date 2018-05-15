@@ -1,0 +1,108 @@
+---
+title: "Informe"
+author: "Ricardo Arango Giraldo"
+date: "14 de mayo de 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+La base de datos *producto-prueba* consta de las siguientes tablas:
+
+```{r,echo=FALSE}
+suppressMessages(library(RMySQL))
+
+##Crear conexión a la base de datos
+suppressMessages(cnc<-dbConnect(MySQL(),user='product',host='35.184.1.48',
+               password='Merlin123',dbname='producto-prueba'))
+
+##Se enlistan todas las tablas que hay en la base de datos
+dbGetQuery(cnc,statement = 'SHOW TABLES')
+
+```
+
+en las cuales se almacena información de **empleadore,trabajos y
+candidatos**, así como de **las condiciones laborales** de las mismas.
+
+
+###1. ¿Cómo definir la calidad del candidato al postularse  a un trabajo? 
+
+```{r,echo=FALSE}
+##1
+##Establecemos pues los criterios con  los cuales se calificara la calidad
+##del candidato
+suppressMessages(jobs<-dbGetQuery(cnc,statement = 'SELECT idJob, idCategory,
+                                  experienceName, jobType, duration FROM
+                                  jobs'))
+
+##Elegimos las variables que pueden caracterizar a un buen candidato
+suppressMessages(cand<-dbGetQuery(cnc,statement = 'SELECT idUser, idCategory,
+                                  position, duration FROM work_experiences'))
+
+
+```
+Hay que ver si las características del candidato se ajustan a los requisitos
+que tiene el trabajo. El principal requisito presente en los datos es la
+experiencia.
+
+```{r,echo=FALSE}
+table(cand$duration)
+```
+
+Por ende, los candidatos mejor calificados son los que tienen más
+experiencia (+3 años). Ya otra característica que se puede tener en cuenta es
+la del cargo que actualmente ocupa, o el último que ocupó. 
+
+
+###2. ¿Qué porcentaje de aplicaciones semanales son de candidatos bien calificados? 
+
+```{r,echo=FALSE}
+##2
+cand_sta<-suppressWarnings(dbGetQuery(cnc,statement = 'SELECT * FROM
+                                      candidate_statistics'))
+cand_sta$timeStamp<-as.Date(cand_sta$timeStamp)
+suppressMessages(cand_sta$idUser<-as.character(cand_sta$idUser))
+
+
+##El id de los candidatos más calificados
+x<-subset(cand,duration=='+3 Years',select = idUser)
+x<-as.list(x)
+
+##data frame con los candidatos mejor calificado que aplicaron
+A<-subset(cand_sta,idUser %in% x$idUser)
+B<-subset(A,event=='Application')
+
+##buenos candidatos/candidatos
+C<-subset(cand_sta,event=='Application')
+m<-length(B$id)/length(C$id)
+
+##numero de semanas
+n<-length(unique(cand_sta$timeStamp))/7
+n<-as.integer(n)
+
+##respuesta
+p<-(m/n)*100
+
+```
+Primero que todo tengamos en cuenta que una misma persona puede ser un
+candidato a diferentes trabajos. Siendo así, los idUser no necesariamente
+deben ser únicos para este caso particular. 
+
+Tenemos un total de `r length(C$id)` candidatos, de los cuales 
+`r length(B$idUser)` son candidatos con la mejor calificación. Lo que quiere
+decir que un `r m*100`%  son candidatos muy bien calificados. 
+
+Ahora bien, lo anterior es en general así que analicemos el porcentaje
+promedio por semana:  con un total de `r n` semanas, tenemos un promedio
+semanal de `r p`% candidatos excelentemente calificados que aplicaron a algún
+trabajo en el lapso de esas `r n` semanas. 
+
+
+###3. .¿Cómo abordarías este problema? Cualquier idea sobre qué mecanismos específicos podría implementarse para hacer que nuestra comparación sea lo más eficiente posible?
+
+Una regresión logística donde la variable respuesta sería el evento
+contratado. Para esto es necesario más datos para entrenar el modelo, así
+como más variables para enriquecer el análisis. 
+
+Completar el perfil de los candidatos con su trayectoria académica, así como
+indicar qué tipo de conocimientos son necesarios para ejercer el cargo. 
